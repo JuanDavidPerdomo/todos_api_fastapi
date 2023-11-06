@@ -1,10 +1,11 @@
 from fastapi import APIRouter, Path
-from model import Todo
+
+from model import Todo, TodoItem
 
 todo_router = APIRouter()
 
-# fake DB using a list
 todo_list = []
+
 
 @todo_router.post("/todo")
 async def add_todo(todo: Todo) -> dict:
@@ -13,11 +14,13 @@ async def add_todo(todo: Todo) -> dict:
         "message": "Todo added successfully."
     }
 
+
 @todo_router.get("/todo")
-async def retrieve_todos() -> dict:
+async def retrieve_todo() -> dict:
     return {
         "todos": todo_list
     }
+
 
 @todo_router.get("/todo/{todo_id}")
 async def get_single_todo(todo_id: int = Path(..., title="The ID of the todo to retrieve.")) -> dict:
@@ -25,7 +28,20 @@ async def get_single_todo(todo_id: int = Path(..., title="The ID of the todo to 
         if todo.id == todo_id:
             return {
                 "todo": todo
-            }        
-    return {
-                "message": "Todo with supplied ID doesn't exist."
             }
+    return {
+        "message": "Todo with supplied ID doesn't exist."
+    }
+
+
+@todo_router.put("/todo/{todo_id}")
+async def update_todo(todo_data: TodoItem, todo_id: int = Path(..., title="The ID of the todo to be updated.")) -> dict:
+    for todo in todo_list:
+        if todo.id == todo_id:
+            todo.item = todo_data.item
+            return {
+                "message": "Todo updated successfully."
+            }
+    return {
+        "message": "Todo with supplied ID doesn't exist."
+    }
